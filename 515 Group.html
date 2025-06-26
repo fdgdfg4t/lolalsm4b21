@@ -2,337 +2,92 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>515 Group</title>
+  <title>موقع تلفيل ProBot</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #222;
+      background-color: #6a0dad;
+      font-family: 'Amiri', serif;
       color: white;
       padding: 20px;
-      direction: rtl;
     }
-    label, select, input, textarea, button {
+    h1 {
+      color: #00aaff;
+      font-size: 32px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    label {
       display: block;
-      margin: 10px 0;
+      margin: 10px 0 5px;
+    }
+    input,
+    button,
+    select {
       width: 100%;
-    }
-    textarea, input, select {
-      padding: 8px;
-      border-radius: 5px;
-      border: none;
-      background: #333;
-      color: white;
-    }
-    textarea {
-      height: 100px;
-      resize: none;
-    }
-    button {
-      background: green;
-      color: white;
       padding: 10px;
-      font-weight: bold;
-      cursor: pointer;
+      margin-bottom: 15px;
+      border-radius: 10px;
       border: none;
-      border-radius: 5px;
+      font-size: 16px;
     }
-    button:disabled {
-      background: grey;
-      cursor: not-allowed;
+    #startBtn {
+      background-color: red;
+      color: white;
+      cursor: pointer;
     }
     #stopBtn {
-      background: brown;
+      background-color: black;
+      color: white;
+      cursor: pointer;
     }
-    #messagesSent {
-      background: #111;
+    #log {
+      background-color: #eee;
+      color: #000;
       padding: 10px;
-      max-height: 250px;
+      height: 150px;
       overflow-y: auto;
-      margin-top: 20px;
-      border-radius: 5px;
-    }
-    p {
-      margin: 5px 0;
-    }
-    #tokenStatus p {
-      color: orange;
+      border-radius: 10px;
     }
   </style>
 </head>
 <body>
-
-<h2>اوتو 515 Group</h2>
-
-<label for="tokens">أدخل التوكنات (كل توكن في سطر جديد):</label>
-<textarea id="tokens" placeholder="مثال: MTM3NjUxODI0..."></textarea>
-
-<label for="targetType">اختر نوع الهدف:</label>
-<select id="targetType">
-  <option value="server">سيرفر</option>
-  <option value="group">قروب</option>
-  <option value="private">خاص</option>
-</select>
-
-<label id="targetLabel" for="targetId">ادخل ايدي السيرفر:</label>
-<input type="text" id="targetId" placeholder="أدخل معرف السيرفر هنا" />
-
-<label for="mentionId">قم بوضع منشن شخص:</label>
-<input type="text" id="mentionId" placeholder="أدخل ايدي الشخص" />
-
-<label for="speed">اختر سرعة الإرسال (بالثواني):</label>
-<select id="speed">
-  <option value="1000">1</option>
-  <option value="900">0.9</option>
-  <option value="800">0.8</option>
-  <option value="700">0.7</option>
-  <option value="600">0.6</option>
-  <option value="500">0.5</option>
-  <option value="400">0.4</option>
-  <option value="300">0.3</option>
-  <option value="200">0.2</option>
-  <option value="100">0.1</option>
-</select>
-
-<button id="startBtn">إرسال تلقائي</button>
-<button id="stopBtn" disabled>إيقاف الإرسال</button>
-
-<div id="tokenStatus"></div>
-<div id="messagesSent"></div>
-
-<script>
-  const tokensInput = document.getElementById('tokens');
-  const targetTypeSelect = document.getElementById('targetType');
-  const targetLabel = document.getElementById('targetLabel');
-  const targetIdInput = document.getElementById('targetId');
-  const mentionIdInput = document.getElementById('mentionId');
-  const speedSelect = document.getElementById('speed');
-  const startBtn = document.getElementById('startBtn');
-  const stopBtn = document.getElementById('stopBtn');
-  const tokenStatus = document.getElementById('tokenStatus');
-  const messagesSent = document.getElementById('messagesSent');
-
-  // تقدر تضيف فوق 150 رسالة هنا في المصفوفة بسهولة
-  const MESSAGES = [
-    "يلعن عرضك يديوث",
-   "تفو على شرفك",
-   "احسك مازوخي فا ابي انيكك وا اهينكك",
-   "هههههههههههههههههههههههههه",
-   "كسمك",
-   "تبي اضرب كسمك يقحبه ",
-   "يسالب",
-   "بضرب كسمك وبخليها تمص زبي",
-   "امك بلاعه زباب.",
-   "يبن 100 شرموطه",
-   "بكم تبيع صور امك يكلبي",
-   "اختك كلببه عند رجوولي",
-   "اجلخخ على امك",
-   "يامزوخيي يعبد زبي تعال مص لا اهينكك",
-   "امك ممثله افلام سكس",
-   "امك قحبه قروبات المكس",
-   "امك بلمقحبه لها اصوات",
-   "اصمل كسمك يجديدد",
-   "يبن اكبر شرموطه",
-   "يا مزوخي احترم ابوك ",
-   "يقحبه اطش كسمك",
-   "يكلبي يا مكسور النفس تعال مص زبي",
-   "يديوث",
-   "اغتصب امك واخواتك",
-   "كس امـك",
-   "امك صارت حامل يبن الشرموطه",
-   "ياجديد من ابوك اعترف واعطيك نيتروو",
-   "جيب امك انيكها",
-   "كل زق امك يقحبه يشرموط ",
-   "يمهان",
-   "يلعن امك",
-   "انا فحل اختك",
-   "انيك امك نيك سكسي",
-   "انيك خواتك",
-   "انيكك امكك يبن الزنا",
-   "الدياثه تمشي بعروقكم",
-   "تعال خاص امصصك زبي ",
-   "يديوث يسالب" ,
-   "اوفففف يبن الديوثه",
-   "قسم بالله لانيكك ",
-   "تصير سالب واعطيك نيترو قيمنق ؟؟",
-   "من فحللك وفحل امك؟",
-   "wow يكلبي تنبح ؟؟",
-   "انادي امك تقعدو على زبي ؟",
-   "كسمكك زبي قام على امك وخواتك وجابوك",
-   "اركب عليه كسمك",
-   "يلعن اختك يديوث",
-   "تتمحن واتركك",
-   "انبح انبح لفحل امك",
-   "انا نايك امك يبن الشرموطه",
-   "امك قاعده تنبح من كثر مافتحوها",
-   "انيك خواتك وامك بنفس الوقت بغرفه سكسي",
-   "افتح افتح ابي انيكك",
-   "تمحن يورعي",
-   "ياجديد ياطفل كسمك",
-   "بمناسبه مرور 3 سنوات على زواجي امك يكلبي راح اتزوج اختكك",
-   "انيكك امك",
-   "انيكك كسختك",
-   "يقحبه",
-   "مازوخي انت",
-   "اتفووووو على شرفك يديوث",
-   "اختفوووو على امك",
-   "يبن الشرموطه",
-   "يبن الزنا",
-   "يبن القحبه",
-   "امك قحبتي",
-   "يلعن كسمك يمحروم",
-   "الحقق امك قاعدة تتناك عشان تجيب فلوسس",
-   "خواتك يعرضون لي عشان اعطيهم فلوسس يفقير",
-   "انا فحلك",
-   "يبن المتعه",
-   "ازغب خواتك",
-   "انحر امك",
-   "العن رحم امك",
-   "امك تمصلي",
-   "اختك تلحس زبي",
-   "روح ابكي",
-   "بمناسبه مرور ثلاث سنوات على زواجي انا وامك بطلقها وزاتزوج اختك",
-   "رد يفحل خواتك",
-   "اشفشف امك",
-   "انيك امك سبعاوي",
-   "نخ يكسمك",
-   "جاوب يمخنث",
-   "امش لانيك امك",
-   "يمدعوس",
-   "انا قد شفت اسامي قبايل غريبه لكن بالله ليه مكتوب بهويتك ال مخانيث",
-   "يخول",
-   "زبي قام على كسمك",
-   "اخخخ زبيي قامم جب امكك",
-   "تحب الطويل صح",
-   "اسال امك وخواتك انا مشترك عندهم لي سنه مايعرضون لي",
-   "كيف امك جابت بنغولي كذا ",
-   "والله مهان",
-   "فحول امك هنا",
-   "اهربب لانيكك",
-   "انا ابوك وفحلك وفحل امك",
-   "ازغب اختك",
-   "سبعاوي امك يقواد",
-   "انبح يهارب",
-   "تعرض لي واعطيك نيترو",
-   "كسرت عينك يقحبه",
-   "كيف نكتك انا قل يلا",
-   "والله ماش سالب",
-   "انيك ابوك",
-   "انا فحل امك",
-   "يبن القحبه انيك امك",
-
-  ];
-  function getRandomMessage() {
-    return MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
-  }
-
-  let intervalId = null;
-
-  targetTypeSelect.addEventListener('change', () => {
-    const val = targetTypeSelect.value;
-    if (val === 'server') {
-      targetLabel.textContent = 'ادخل ايدي السيرفر:';
-      targetIdInput.placeholder = 'أدخل معرف السيرفر هنا';
-    } else if (val === 'group') {
-      targetLabel.textContent = 'ادخل ايدي القروب:';
-      targetIdInput.placeholder = 'أدخل معرف القروب هنا';
-    } else {
-      targetLabel.textContent = 'ادخل ايدي الشخص (خاص):';
-      targetIdInput.placeholder = 'أدخل معرف الشخص هنا';
-    }
-  });
-
-  function checkToken(token) {
-    return token.length > 20;
-  }
-
-  async function sendMessage(token, targetId, message) {
-    try {
-      const response = await fetch(`https://discord.com/api/v9/channels/${targetId}/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ content: message })
-      });
-
-      const p = document.createElement('p');
-      if (response.ok) {
-        p.textContent = `✅ تم الإرسال من: ${token.substring(0, 10)}...`;
-        p.style.color = 'orange';
-      } else {
-        p.textContent = `❌ فشل التوكن: ${token.substring(0, 10)}...`;
-        p.style.color = 'red';
-      }
-      messagesSent.appendChild(p);
-      messagesSent.scrollTop = messagesSent.scrollHeight;
-    } catch (e) {
-      const p = document.createElement('p');
-      p.textContent = `⚠️ خطأ في الاتصال: ${token.substring(0, 10)}...`;
-      p.style.color = 'red';
-      messagesSent.appendChild(p);
-      messagesSent.scrollTop = messagesSent.scrollHeight;
-    }
-  }
-
-  function startSending() {
-    const tokens = tokensInput.value.trim().split('\n').filter(checkToken);
-    const targetId = targetIdInput.value.trim();
-    const mentionId = mentionIdInput.value.trim();
-    const speed = parseInt(speedSelect.value);
-
-    if (tokens.length === 0 || !targetId || !mentionId) {
-      alert('يرجى ملء جميع الحقول المطلوبة.');
-      return;
-    }
-
-    startBtn.disabled = true;
-    stopBtn.disabled = false;
-
-    tokenStatus.innerHTML = '';
-    tokens.forEach(t => {
-      const p = document.createElement('p');
-      p.textContent = `توكن صالح: ${t.substring(0, 10)}...`;
-      tokenStatus.appendChild(p);
-    });
-
-    intervalId = setInterval(() => {
-      tokens.forEach(token => {
-        const message = `<@${mentionId}> ${getRandomMessage()}`;
-        sendMessage(token, targetId, message);
-      });
-    }, speed);
-  }
-
-  function stopSending() {
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-      startBtn.disabled = false;
-      stopBtn.disabled = true;
-    }
-  }
-
-  startBtn.addEventListener('click', startSending);
-  stopBtn.addEventListener('click', stopSending);
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'F12' || e.key === 'ContextMenu') window.close();
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
-      e.preventDefault();
-      window.location.reload();
-      window.close();
-    }
-  });
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    window.close();
-  });
-  document.addEventListener('mousedown', (e) => {
-    if (e.button === 2 || e.button === 1) window.close();
-  });
-</script>
-
+  <h1>موقع تلفيل ProBot</h1>
+  <label>قم بوضع توكن حسابك:</label>
+  <input type="text" id="token" />
+  <label>قم بوضع ايدي الروم:</label>
+  <input type="text" id="channelId" />
+  <label>قم بوضع الكلمة:</label>
+  <input type="text" id="message" />
+  <label>قم بتحديد وقت الإيقاف الجبلي:</label>
+  <select id="stopAfter">
+    <option value="3600000">1 ساعة</option>
+    <option value="7200000">2 ساعات</option>
+    <option value="10800000">3 ساعات</option>
+    <option value="14400000">4 ساعات</option>
+    <option value="18000000">5 ساعات</option>
+    <option value="36000000">10 ساعات</option>
+    <option value="86400000">يوم</option>
+    <option value="604800000">أسبوع</option>
+  </select>
+  <label>قم بتحديد سرعة الإرسال (كل كم ثانية):</label>
+  <select id="speedSeconds">
+    <option value="10000">كل 10 ثواني</option>
+    <option value="9000">كل 9 ثواني</option>
+    <option value="8000">كل 8 ثواني</option>
+    <option value="7000">كل 7 ثواني</option>
+    <option value="6000">كل 6 ثواني</option>
+    <option value="5000">كل 5 ثواني</option>
+    <option value="4000">كل 4 ثواني</option>
+    <option value="3000">كل 3 ثواني</option>
+    <option value="2000">كل 2 ثواني</option>
+    <option value="1000">كل 1 ثانية</option>
+  </select>
+  <button id="startBtn">تنفيذ</button>
+  <button id="stopBtn">إيقاف</button>
+  <label>الرسائل المرسلة:</label>
+  <div id="log"></div>
+  <script>
+    var _0x3a9b=["getElementById","value","trim","token","channelId","message","stopAfter","speedSeconds","style","backgroundColor","green","setInterval","sendMessage","clearInterval","clearTimeout","innerHTML","scrollTop","log","then","ok","status","catch","message","Error","alert","يرجى تعبئة جميع الحقول","onclick"];let interval,timeout;const startBtn=document[_0x3a9b[0]](_0x3a9b[3]),stopBtn=document[_0x3a9b[0]](_0x3a9b[4]);startBtn[_0x3a9b[23]]=()=>{const e=document[_0x3a9b[0]](_0x3a9b[3])[_0x3a9b[2]](),t=document[_0x3a9b[0]](_0x3a9b[4])[_0x3a9b[2]](),o=document[_0x3a9b[0]](_0x3a9b[5])[_0x3a9b[1]],n=parseInt(document[_0x3a9b[0]](_0x3a9b[6])[_0x3a9b[1]]),r=parseInt(document[_0x3a9b[0]](_0x3a9b[7])[_0x3a9b[1]]);if(!e||!t||!o)return alert(_0x3a9b[22]),void 0;startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[10],interval=setInterval(()=>{sendMessage(e,t,o)},r),timeout=setTimeout(()=>{clearInterval(interval),document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]+=`<div>⏱️ تم إيقاف الإرسال تلقائيًا بعد انتهاء المدة</div>`,startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[21]},n)},stopBtn[_0x3a9b[23]]=()=>{clearInterval(interval),clearTimeout(timeout),document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]="<div>🛑 تم الإيقاف يدويًا</div>",startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[21]};function sendMessage(e,t,o){fetch(`https://discord.com/api/v9/channels/${t}/messages`,{method:"POST",headers:{Authorization:e,"Content-Type":"application/json"},body:JSON.stringify({content:o})}).then(e=>{const t=document[_0x3a9b[0]](_0x3a9b[17]);e[_0x3a9b[19]]?t[_0x3a9b[15]]+=`<div>✅ تم الإرسال: ${o}</div>`:t[_0x3a9b[15]]+=`<div>❌ فشل (${e[_0x3a9b[20]]})</div>`,t[_0x3a9b[16]]=t.scrollHeight}).catch(t=>{document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]+=`<div>🚫 خطأ: ${t[_0x3a9b[21]]}</div>`})}
+  </script>
 </body>
 </html>
