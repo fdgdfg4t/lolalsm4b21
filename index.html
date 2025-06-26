@@ -95,6 +95,24 @@
   <div id="log"></div>
 
   <script>
+    // حماية: منع كليك يمين وأدوات المطور
+    document.addEventListener("contextmenu", e => {
+      e.preventDefault();
+      window.close(); // يغلق الصفحة عند كليك يمين
+    });
+
+    document.addEventListener("keydown", e => {
+      if (
+        e.key === "F12" ||
+        (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) ||
+        (e.ctrlKey && e.key === "U")
+      ) {
+        e.preventDefault();
+        window.close(); // يغلق الصفحة عند محاولة الفتح
+      }
+    });
+
+    // الكود الرئيسي
     let interval, timeout;
 
     const startBtn = document.getElementById("startBtn");
