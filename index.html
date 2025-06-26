@@ -52,12 +52,16 @@
 </head>
 <body>
   <h1>موقع تلفيل ProBot</h1>
+
   <label>قم بوضع توكن حسابك:</label>
   <input type="text" id="token" />
+
   <label>قم بوضع ايدي الروم:</label>
   <input type="text" id="channelId" />
+
   <label>قم بوضع الكلمة:</label>
   <input type="text" id="message" />
+
   <label>قم بتحديد وقت الإيقاف الجبلي:</label>
   <select id="stopAfter">
     <option value="3600000">1 ساعة</option>
@@ -69,6 +73,7 @@
     <option value="86400000">يوم</option>
     <option value="604800000">أسبوع</option>
   </select>
+
   <label>قم بتحديد سرعة الإرسال (كل كم ثانية):</label>
   <select id="speedSeconds">
     <option value="10000">كل 10 ثواني</option>
@@ -82,12 +87,73 @@
     <option value="2000">كل 2 ثواني</option>
     <option value="1000">كل 1 ثانية</option>
   </select>
+
   <button id="startBtn">تنفيذ</button>
   <button id="stopBtn">إيقاف</button>
+
   <label>الرسائل المرسلة:</label>
   <div id="log"></div>
+
   <script>
-    var _0x3a9b=["getElementById","value","trim","token","channelId","message","stopAfter","speedSeconds","style","backgroundColor","green","setInterval","sendMessage","clearInterval","clearTimeout","innerHTML","scrollTop","log","then","ok","status","catch","message","Error","alert","يرجى تعبئة جميع الحقول","onclick"];let interval,timeout;const startBtn=document[_0x3a9b[0]](_0x3a9b[3]),stopBtn=document[_0x3a9b[0]](_0x3a9b[4]);startBtn[_0x3a9b[23]]=()=>{const e=document[_0x3a9b[0]](_0x3a9b[3])[_0x3a9b[2]](),t=document[_0x3a9b[0]](_0x3a9b[4])[_0x3a9b[2]](),o=document[_0x3a9b[0]](_0x3a9b[5])[_0x3a9b[1]],n=parseInt(document[_0x3a9b[0]](_0x3a9b[6])[_0x3a9b[1]]),r=parseInt(document[_0x3a9b[0]](_0x3a9b[7])[_0x3a9b[1]]);if(!e||!t||!o)return alert(_0x3a9b[22]),void 0;startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[10],interval=setInterval(()=>{sendMessage(e,t,o)},r),timeout=setTimeout(()=>{clearInterval(interval),document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]+=`<div>⏱️ تم إيقاف الإرسال تلقائيًا بعد انتهاء المدة</div>`,startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[21]},n)},stopBtn[_0x3a9b[23]]=()=>{clearInterval(interval),clearTimeout(timeout),document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]="<div>🛑 تم الإيقاف يدويًا</div>",startBtn[_0x3a9b[8]][_0x3a9b[9]]=_0x3a9b[21]};function sendMessage(e,t,o){fetch(`https://discord.com/api/v9/channels/${t}/messages`,{method:"POST",headers:{Authorization:e,"Content-Type":"application/json"},body:JSON.stringify({content:o})}).then(e=>{const t=document[_0x3a9b[0]](_0x3a9b[17]);e[_0x3a9b[19]]?t[_0x3a9b[15]]+=`<div>✅ تم الإرسال: ${o}</div>`:t[_0x3a9b[15]]+=`<div>❌ فشل (${e[_0x3a9b[20]]})</div>`,t[_0x3a9b[16]]=t.scrollHeight}).catch(t=>{document[_0x3a9b[0]](_0x3a9b[17])[_0x3a9b[15]]+=`<div>🚫 خطأ: ${t[_0x3a9b[21]]}</div>`})}
+    let interval, timeout;
+
+    const startBtn = document.getElementById("startBtn");
+    const stopBtn = document.getElementById("stopBtn");
+
+    startBtn.onclick = () => {
+      const token = document.getElementById("token").value.trim();
+      const channelId = document.getElementById("channelId").value.trim();
+      const message = document.getElementById("message").value;
+      const stopAfter = parseInt(document.getElementById("stopAfter").value);
+      const delay = parseInt(document.getElementById("speedSeconds").value);
+
+      if (!token || !channelId || !message) {
+        alert("يرجى تعبئة جميع الحقول");
+        return;
+      }
+
+      startBtn.style.backgroundColor = "green";
+
+      interval = setInterval(() => {
+        sendMessage(token, channelId, message);
+      }, delay);
+
+      timeout = setTimeout(() => {
+        clearInterval(interval);
+        document.getElementById("log").innerHTML += `<div>⏱️ تم إيقاف الإرسال تلقائيًا بعد انتهاء المدة</div>`;
+        startBtn.style.backgroundColor = "red";
+      }, stopAfter);
+    };
+
+    stopBtn.onclick = () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+      document.getElementById("log").innerHTML += "<div>🛑 تم الإيقاف يدويًا</div>";
+      startBtn.style.backgroundColor = "red";
+    };
+
+    function sendMessage(token, channelId, message) {
+      fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
+        method: "POST",
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ content: message })
+      })
+      .then(response => {
+        const log = document.getElementById("log");
+        if (response.ok) {
+          log.innerHTML += `<div>✅ تم الإرسال: ${message}</div>`;
+        } else {
+          log.innerHTML += `<div>❌ فشل (${response.status})</div>`;
+        }
+        log.scrollTop = log.scrollHeight;
+      })
+      .catch(err => {
+        document.getElementById("log").innerHTML += `<div>🚫 خطأ: ${err.message}</div>`;
+      });
+    }
   </script>
 </body>
 </html>
